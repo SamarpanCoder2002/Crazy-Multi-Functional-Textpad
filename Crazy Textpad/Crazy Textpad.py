@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk, messagebox, font, filedialog
+from tkinter import ttk, messagebox, font, filedialog, colorchooser
 from PIL import Image,ImageTk
 import time, win32api
 import mysql.connector as db
@@ -12,10 +12,7 @@ class TextPad:
         mainframe = Frame(self.window, bg="white")
         mainframe.pack(pady=56)
 
-
-
         self.permission_to_update = 0
-        #self.main_writing_space = None
 
         self.db_pwd_store = None
         self.record_no = -1
@@ -33,6 +30,12 @@ class TextPad:
         self.font_tag_name_store = []
         self.font_tag_counter = 0
 
+        self.fg_tag_name_store = []
+        self.fg_tag_counter = 0
+
+        self.bg_tag_name_store = []
+        self.bg_tag_counter = 0
+
         self.current_font_size = 20
         self.current_font = "Arial"
 
@@ -46,7 +49,6 @@ class TextPad:
         self.__writing_area()
         self.__footer()
         self.__menu_decor()
-
 
     def __menu_decor(self):# Menu decorating function
         global file_new_img, file_open_img, file_save_img, file_pdf_img, file_print_img, file_exit_img, edit_undo_img, edit_redo_img, edit_cut_img, edit_copy_img, edit_paste_img, edit_clear_img, view_find_img, view_replace_img, view_dark_img, view_light_img, customization_bold_img, customization_italic_img, customization_underline_img, customization_foreground_color_img, customization_background_color_img
@@ -109,6 +111,11 @@ class TextPad:
         self.edit_menu.add_command(label="Paste", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Ctrl+V)", compound=LEFT, image=edit_paste_img, command=self.paste)
         self.edit_menu.add_separator(background="green")
         self.edit_menu.add_command(label="Clear", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), compound=LEFT, image=edit_clear_img, command=self.clear)
+        self.window.bind('<Control-Key-z>', self.undo)
+        self.window.bind('<Control-Key-y>', self.undo)
+        self.window.bind('<Control-Key-x>', self.cut)
+        self.window.bind('<Control-Key-c>', self.copy)
+        self.window.bind('<Control-Key-v>', self.paste)
 
 
         self.view_menu = Menu(menu_control,tearoff=False)
@@ -118,15 +125,23 @@ class TextPad:
         self.view_menu.add_separator(background="green")
         self.view_menu.add_command(label="Dark Mode", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), compound=LEFT, image=view_dark_img, command=self.dark_mode)
         self.view_menu.add_command(label="Light Mode", background="green", foreground="Yellow", activebackground="yellow",       activeforeground="green", font=("Arial", 10, "bold", "italic"), compound=LEFT, image=view_light_img, command=self.light_mode)
+        self.window.bind('<Control-Key-f>', self.find_UI)
+        self.window.bind('<Control-Key-r>', self.replace_UI)
+
 
         self.customization_menu = Menu(menu_control, tearoff=False)
         menu_control.add_cascade(label="Customization", menu=self.customization_menu)
-        self.customization_menu.add_command(label="Bold", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Ctrl+B)", compound=LEFT, image=customization_bold_img)
-        self.customization_menu.add_command(label="Italics", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Ctrl+I)", compound=LEFT, image=customization_italic_img)
-        self.customization_menu.add_command(label="Underline", background="green", foreground="Yellow",                     activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Ctrl+U)", compound=LEFT, image=customization_underline_img)
+        self.customization_menu.add_command(label="Bold", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Ctrl+B)", compound=LEFT, image=customization_bold_img, command=self.change_bold)
+        self.customization_menu.add_command(label="Italics", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Ctrl+I)", compound=LEFT, image=customization_italic_img, command=self.change_italic)
+        self.customization_menu.add_command(label="Underline", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Ctrl+U)", compound=LEFT, image=customization_underline_img, command=self.change_underline)
         self.customization_menu.add_separator(background="green")
-        self.customization_menu.add_command(label="Foreground-Color", background="green", foreground="Yellow", activebackground="yellow",     activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Shift+F)", compound=LEFT, image=customization_foreground_color_img)
-        self.customization_menu.add_command(label="Background-Color", background="green", foreground="Yellow", activebackground="yellow",      activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Shift+B)", compound=LEFT, image=customization_background_color_img)
+        self.customization_menu.add_command(label="Foreground-Color", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Alt+F)", compound=LEFT, image=customization_foreground_color_img, command=self.change_fg_color)
+        self.customization_menu.add_command(label="Background-Color", background="green", foreground="Yellow", activebackground="yellow", activeforeground="green", font=("Arial", 10, "bold", "italic"), accelerator="(Alt+B)", compound=LEFT, image=customization_background_color_img, command=self.change_bg_color)
+        self.window.bind('<Control-Key-b>', self.change_bold)
+        self.window.bind('<Control-Key-r>', self.change_italic)
+        self.window.bind('<Control-Key-u>', self.change_underline)
+        self.window.bind('<Alt-f>', self.change_fg_color)
+        self.window.bind('<Alt-b>', self.change_bg_color)
 
 
     def __header(self):# Header container make
@@ -817,6 +832,7 @@ class TextPad:
             self.record_no+=1
 
         self.save()
+
         working_time_is = time.strftime("%H:%M:%S", time.gmtime(self.get_time))
         d = time.strftime("%d")
         m = time.strftime("%m")
@@ -841,8 +857,7 @@ class TextPad:
         self.pdf_saved_file_name = "Nothing To Show"
         self.saved_file_name_in_google_drive = "Nothing To Show"
 
-        self.font_tag_name_store.clear()
-        self.font_tag_counter = 0
+        self.previous_tag_remove()
 
         self.main_writing_space.unbind('<KeyRelease>')
         self.permission_to_update = 0
@@ -864,6 +879,15 @@ class TextPad:
 
         messagebox.showinfo("Log-Out", "You are log out from your current account")
 
+    def previous_tag_remove(self):
+        self.font_tag_name_store.clear()
+        self.font_tag_counter = 0
+
+        self.fg_tag_name_store.clear()
+        self.fg_tag_counter = 0
+
+        self.bg_tag_name_store.clear()
+        self.bg_tag_counter = 0
 
     # New Menu Configuration
     def new_window(self, e=None):
@@ -937,41 +961,43 @@ class TextPad:
             self.window.destroy()
 
     # Edit menu Configuration
-    def undo(self):
+    def undo(self, e=None):
         try:
             self.edit_menu.entryconfigure(0,command=self.main_writing_space.edit_undo)
         except:
             messagebox.showinfo("Container Empty", "No action to perform")
 
-    def redo(self):
+    def redo(self, e=None):
         try:
             self.edit_menu.entryconfigure(1,command=self.main_writing_space.edit_redo)
         except:
             messagebox.showinfo("Container Empty", "No action to perform")
 
-
-    def cut(self):
+    def cut(self, e=None):
         get_text = self.main_writing_space.get("sel.first", "sel.last")
         self.main_writing_space.delete("sel.first", "sel.last")
         print(get_text)
         self.main_writing_space.clipboard_clear()
         self.main_writing_space.clipboard_append(get_text)
 
-    def copy(self):
+    def copy(self, e=None):
         get_text = self.main_writing_space.get("sel.first", "sel.last")
         print(get_text)
         self.main_writing_space.clipboard_clear()
         self.main_writing_space.clipboard_append(get_text)
 
-    def paste(self):
+    def paste(self, e=None):
         self.main_writing_space.insert(INSERT,self.main_writing_space.clipboard_get())
 
     def clear(self):
         conform = messagebox.askyesno("Conformation to clean", "Do you want to clean the writing space?")
         if conform:
             self.main_writing_space.delete(1.0, END)
+            self.previous_tag_remove()
 
-    def find_UI(self):
+
+    # View menu Configuration
+    def find_UI(self, e=None):
         top = Toplevel()
         top.title("Finding")
         top.geometry("600x300")
@@ -1022,7 +1048,7 @@ class TextPad:
 
         top.mainloop()
 
-    def replace_UI(self):
+    def replace_UI(self, e=None):
         top = Toplevel()
         top.title("Replacing")
         top.geometry("600x400")
@@ -1066,17 +1092,6 @@ class TextPad:
 
         top.mainloop()
 
-
-
-
-
-
-
-
-
-
-
-    # View menu Configuration
     def dark_mode(self):
         self.main_writing_space.config(bg="#0d0d0d", fg="#00FF00", insertbackground="green", selectbackground="#8989ff")
 
@@ -1128,7 +1143,7 @@ class TextPad:
         self.customization_menu.entryconfig("Italics", background="#474747")
         self.customization_menu.entryconfig("Underline", background="#474747")
         self.customization_menu.entryconfig("Foreground-Color", background="#474747")
-        self.customization_menu.entryconfig("Background-Color", background="#474747", state=DISABLED)
+        self.customization_menu.entryconfig("Background-Color", background="#474747")
         self.customization_menu.delete(3)
         self.customization_menu.insert_separator(3, background="#474747")
 
@@ -1182,9 +1197,128 @@ class TextPad:
         self.customization_menu.entryconfig("Italics", background="green", foreground="Yellow")
         self.customization_menu.entryconfig("Underline", background="green", foreground="Yellow")
         self.customization_menu.entryconfig("Foreground-Color", background="green", foreground="Yellow")
-        self.customization_menu.entryconfig("Background-Color", background="green", foreground="Yellow", state=NORMAL)
+        self.customization_menu.entryconfig("Background-Color", background="green", foreground="Yellow")
         self.customization_menu.delete(3)
         self.customization_menu.insert_separator(3, background="green")
+
+    # customization menu
+    def change_bold(self, e=None):
+        try:
+            get_font = font.Font(self.main_writing_space, self.main_writing_space.cget("font"))
+            get_font.configure(weight="bold")
+
+            self.main_writing_space.tag_configure("make_bold", font=get_font)
+
+            current_tags = self.main_writing_space.tag_names("sel.first")
+
+            if "make_bold" in current_tags:
+                self.main_writing_space.tag_remove("make_bold", "sel.first", "sel.last")
+            else:
+                self.main_writing_space.tag_add("make_bold", "sel.first", "sel.last")
+        except:
+            print("\nSelection Error")
+
+    def change_italic(self, e=None):
+        try:
+            get_font = font.Font(self.main_writing_space, self.main_writing_space.cget("font"))
+            get_font.configure(slant="italic")
+
+            self.main_writing_space.tag_configure("make_italic", font=get_font)
+
+            current_tags = self.main_writing_space.tag_names("sel.first")
+
+            if "make_italic" in current_tags:
+                self.main_writing_space.tag_remove("make_italic", "sel.first", "sel.last")
+            else:
+                self.main_writing_space.tag_add("make_italic", "sel.first", "sel.last")
+        except:
+            print("\nSelection Error")
+
+    def change_underline(self, e=None):
+        try:
+            get_font = font.Font(self.main_writing_space, self.main_writing_space.cget("font"))
+            get_font.configure(underline=True)
+
+            self.main_writing_space.tag_configure("make_underline", font=get_font)
+
+            current_tags = self.main_writing_space.tag_names("sel.first")
+
+            if "make_underline" in current_tags:
+                self.main_writing_space.tag_remove("make_underline", "sel.first", "sel.last")
+            else:
+                self.main_writing_space.tag_add("make_underline", "sel.first", "sel.last")
+        except:
+            print("\nSelection Error")
+
+    def change_fg_color(self, e=None):
+        try:
+            take_color = colorchooser.askcolor()[1]
+            font_change = font.Font(self.main_writing_space, self.main_writing_space.cget("font"))
+
+            if len(self.fg_tag_name_store) == 0:
+                temp_store = [self.fg_tag_counter, self.main_writing_space.index("sel.first"),
+                              self.main_writing_space.index("sel.last")]
+                self.fg_tag_name_store.append(temp_store)
+                temp = self.fg_tag_name_store[0][0]
+                self.fg_tag_counter += 1
+            else:
+                def search_it():
+                    start = self.main_writing_space.index("sel.first")
+                    end = self.main_writing_space.index("sel.last")
+                    for take in self.fg_tag_name_store:
+                        if take[1] == start and take[2] == end:
+                            temp = take[0]
+                            return temp
+                    return -1
+
+                temp = search_it()
+
+                if temp == -1:
+                    temp_store = [self.fg_tag_counter, self.main_writing_space.index("sel.first"),
+                                  self.main_writing_space.index("sel.last")]
+                    self.fg_tag_name_store.append(temp_store)
+                    temp = self.fg_tag_name_store[self.fg_tag_counter][0]
+                    self.fg_tag_counter += 1
+
+            self.main_writing_space.tag_configure(temp, font=font_change, foreground=take_color)
+            self.main_writing_space.tag_add(temp, "sel.first", "sel.last")
+        except:
+            messagebox.showerror("Selection Error", "Select select a text to change font")
+
+    def change_bg_color(self, e=None):
+        try:
+            take_color = colorchooser.askcolor()[1]
+            font_change = font.Font(self.main_writing_space, self.main_writing_space.cget("font"))
+
+            if len(self.bg_tag_name_store) == 0:
+                temp_store = [self.fg_tag_counter, self.main_writing_space.index("sel.first"),
+                              self.main_writing_space.index("sel.last")]
+                self.bg_tag_name_store.append(temp_store)
+                temp = self.bg_tag_name_store[0][0]
+                self.bg_tag_counter += 1
+            else:
+                def search_it():
+                    start = self.main_writing_space.index("sel.first")
+                    end = self.main_writing_space.index("sel.last")
+                    for take in self.bg_tag_name_store:
+                        if take[1] == start and take[2] == end:
+                            temp = take[0]
+                            return temp
+                    return -1
+
+                temp = search_it()
+
+                if temp == -1:
+                    temp_store = [self.bg_tag_counter, self.main_writing_space.index("sel.first"),
+                                  self.main_writing_space.index("sel.last")]
+                    self.bg_tag_name_store.append(temp_store)
+                    temp = self.bg_tag_name_store[self.bg_tag_counter][0]
+                    self.bg_tag_counter += 1
+
+            self.main_writing_space.tag_configure(temp, font=font_change, background=take_color)
+            self.main_writing_space.tag_add(temp, "sel.first", "sel.last")
+        except:
+            messagebox.showerror("Selection Error", "Select select a text to change font")
 
     # Header Configuration
     def change_font_size(self, e):
@@ -1343,7 +1477,6 @@ class TextPad:
                                 count_delete-=1
                         else:
                             break
-
                     else:
                         break
 
@@ -1372,6 +1505,12 @@ class TextPad:
 
         if self.permission_to_update == 1:
             self.total_word_and_line_counter(None)
+
+    # header 3 configuration
+
+
+
+
 
     def total_word_and_line_counter(self, e = None):
         total_take = list(self.main_writing_space.get(1.0, END).split("\n"))
