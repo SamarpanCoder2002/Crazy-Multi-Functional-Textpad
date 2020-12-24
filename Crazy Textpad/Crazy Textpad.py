@@ -1,9 +1,10 @@
 from tkinter import *
 from tkinter import ttk, messagebox, font, filedialog, colorchooser
 from PIL import Image,ImageTk
-import time, win32api
+import time, win32api, pyttsx3, threading, webbrowser, PyPDF2
 import mysql.connector as db
 from fpdf import FPDF
+from Textpad_Containers import Sketch_With_Sam as Drawing_app
 
 class TextPad:
     def __init__(self, root):
@@ -12,8 +13,14 @@ class TextPad:
         mainframe = Frame(self.window, bg="white")
         mainframe.pack(pady=56)
 
+        # Voice Control
+        self.engine_control = pyttsx3.init('sapi5')
+        self.engine_control.setProperty('rate', 130)
+
+        # This is for history store particular account related
         self.permission_to_update = 0
 
+        # Varibales Initialization for particular account
         self.db_pwd_store = None
         self.record_no = -1
         self.record_status = "Yes"
@@ -27,6 +34,7 @@ class TextPad:
         self.pdf_saved_file_name = "Nothing To Show"
         self.saved_file_name_in_google_drive = "Nothing To Show"
 
+        # For tag store
         self.font_tag_name_store = []
         self.font_tag_counter = 0
 
@@ -45,8 +53,8 @@ class TextPad:
         self.curr_acc_pwd = None
 
         # Some basic function call
-        self.__header()
         self.__writing_area()
+        self.__header()
         self.__footer()
         self.__menu_decor()
 
@@ -267,35 +275,35 @@ class TextPad:
         self.header_2_components.append(bullet)
 
     def __header_3_decoration(self):
-        global ts_img,u_img,lc_img,w_mark_image,gs_image,wm_image
+        global ts_img,u_img,lc_img,g_search_image,gs_image,wm_image
 
         # Image bringing
         ts_img = ImageTk.PhotoImage(Image.open("TextPad_Images/TS.png").resize((50,50), Image.ANTIALIAS))
         u_img = ImageTk.PhotoImage(Image.open("TextPad_Images/U.png").resize((50, 50), Image.ANTIALIAS))
         lc_img = ImageTk.PhotoImage(Image.open("TextPad_Images/L.png").resize((50, 50), Image.ANTIALIAS))
-        w_mark_image = ImageTk.PhotoImage(Image.open("TextPad_Images/w_mark_img.png").resize((50, 50), Image.ANTIALIAS))
+        g_search_image = ImageTk.PhotoImage(Image.open("TextPad_Images/g_search.png").resize((50, 50), Image.ANTIALIAS))
         gs_image = ImageTk.PhotoImage(Image.open("TextPad_Images/magnifier.jpg").resize((50, 30), Image.ANTIALIAS))
-        wm_image = ImageTk.PhotoImage(Image.open("TextPad_Images/WM_img.png").resize((50, 30), Image.ANTIALIAS))
+        wm_image = ImageTk.PhotoImage(Image.open("TextPad_Images/replace_icon.png").resize((50, 30), Image.ANTIALIAS))
 
         self.header_3_components = []
 
         # Instructional Buttons
-        u_case = Button(self.header_3, width=35, height=30, image=u_img, bg="#00FF00", relief=RAISED, bd=3)
+        u_case = Button(self.header_3, width=35, height=30, image=u_img, bg="#00FF00", relief=RAISED, bd=3, command=lambda: self.case_change('u'))
         u_case.place(x=25, y=0)
 
-        l_case = Button(self.header_3, width=35, height=30, image=lc_img, bg="#00FF00", relief=RAISED, bd=3)
+        l_case = Button(self.header_3, width=35, height=30, image=lc_img, bg="#00FF00", relief=RAISED, bd=3, command=lambda: self.case_change('l'))
         l_case.place(x=140, y=0)
 
-        ts = Button(self.header_3, width=35, height=30, image=ts_img, bg="#00FF00", relief=RAISED, bd=3)
+        ts = Button(self.header_3, width=35, height=30, image=ts_img, bg="#00FF00", relief=RAISED, bd=3, command=self.text_to_speech_convert_with_threading)
         ts.place(x=250, y=0)
 
-        w_mark = Button(self.header_3, width=35, height=30, image=w_mark_image, bg="#00FF00", relief=RAISED, bd=3)
+        w_mark = Button(self.header_3, width=35, height=30, image=g_search_image, bg="#00FF00", relief=RAISED, bd=3, command=self.ui_for_searching)
         w_mark.place(x=25, y=45)
 
-        g_search = Button(self.header_3, width=35, height=30, image=gs_image, bg="#00FF00", relief=RAISED, bd=3)
+        g_search = Button(self.header_3, width=35, height=30, image=gs_image, bg="#00FF00", relief=RAISED, bd=3, command=self.find_UI)
         g_search.place(x=140, y=45)
 
-        w_meaning = Button(self.header_3, width=35, height=30, image=wm_image, bg="#00FF00", relief=RAISED, bd=3)
+        w_meaning = Button(self.header_3, width=35, height=30, image=wm_image, bg="#00FF00", relief=RAISED, bd=3, command=self.replace_UI)
         w_meaning.place(x=250, y=45)
 
         # Store instructional buttons
@@ -319,7 +327,7 @@ class TextPad:
         paint_image = ImageTk.PhotoImage(Image.open("sketch_images/pencil.png").resize((30, 30), Image.ANTIALIAS))
 
         # Instructional buttons
-        pdf_txt = Button(self.header_4, width=35, height=30, image=pdf_txt_img, font=("Arial", 11, "bold"), bg="#00FF00", relief=RAISED, bd=3)
+        pdf_txt = Button(self.header_4, width=35, height=30, image=pdf_txt_img, font=("Arial", 11, "bold"), bg="#00FF00", relief=RAISED, bd=3, command=self.pdf_to_text)
         pdf_txt.place(x=25, y=0)
 
         sg = Button(self.header_4, width=35, height=30, image=g_drive_img, font=("Arial", 2, "bold"), bg="#00FF00", relief=RAISED, bd=3)
@@ -328,13 +336,13 @@ class TextPad:
         g = Button(self.header_4, width=35, height=30, image=wp_logo_img, bg="green", relief=RAISED, bd=3)
         g.place(x=230, y=0)
 
-        w = Button(self.header_4, width=35, height=30, image=wiki_img, font=("Arial", 11, "bold"), bg="#00FF00", relief=RAISED, bd=3)
+        w = Button(self.header_4, width=35, height=30, image=wiki_img, font=("Arial", 11, "bold"), bg="#00FF00", relief=RAISED, bd=3, command=self.open_wikipedia)
         w.place(x=25, y=45)
 
         ts = Button(self.header_4, width=35, height=30, image=screenshot_image, bg="#00FF00", relief=RAISED, bd=3)
         ts.place(x=125, y=45)
 
-        op = Button(self.header_4, width=35, height=30, image=paint_image, font=("Arial", 11, "bold"), bg="#00FF00", relief=RAISED, bd=3)
+        op = Button(self.header_4, width=35, height=30, image=paint_image, font=("Arial", 11, "bold"), bg="#00FF00", relief=RAISED, bd=3, command=TextPad.connect_drawing_app)
         op.place(x=230, y=45)
 
         # Store instructional buttons
@@ -880,12 +888,18 @@ class TextPad:
         messagebox.showinfo("Log-Out", "You are log out from your current account")
 
     def previous_tag_remove(self):
+        for every in self.font_tag_name_store:
+            self.main_writing_space.tag_remove(every[0], every[1], every[2])
         self.font_tag_name_store.clear()
         self.font_tag_counter = 0
 
+        for every in self.fg_tag_name_store:
+            self.main_writing_space.tag_remove(every[0], every[1], every[2])
         self.fg_tag_name_store.clear()
         self.fg_tag_counter = 0
 
+        for every in self.bg_tag_name_store:
+            self.main_writing_space.tag_remove(every[0], every[1], every[2])
         self.bg_tag_name_store.clear()
         self.bg_tag_counter = 0
 
@@ -936,7 +950,12 @@ class TextPad:
         take_file_name = filedialog.asksaveasfilename(initialdir="\Desktop", title="Select location and name to save that file as PDF", defaultextension=".pdf")
         if take_file_name:
             self.pdf_saved_file_name = take_file_name.split("/")
-            self.pdf_saved_file_name = self.pdf_saved_file_name[len(self.pdf_saved_file_name)-1]
+            
+            if self.pdf_saved_file_name == "Nothing To Show":
+                self.pdf_saved_file_name = self.pdf_saved_file_name[len(self.pdf_saved_file_name)-1]
+            else:
+                self.pdf_saved_file_name += self.pdf_saved_file_name[len(self.pdf_saved_file_name) - 1]
+                
             self.window.title(f"Crazy TextPad         {take_file_name}")
             pdf_control = FPDF()
             pdf_control.add_page()
@@ -974,27 +993,35 @@ class TextPad:
             messagebox.showinfo("Container Empty", "No action to perform")
 
     def cut(self, e=None):
-        get_text = self.main_writing_space.get("sel.first", "sel.last")
-        self.main_writing_space.delete("sel.first", "sel.last")
-        print(get_text)
-        self.main_writing_space.clipboard_clear()
-        self.main_writing_space.clipboard_append(get_text)
+        try:
+            get_text = self.main_writing_space.get("sel.first", "sel.last")
+            self.main_writing_space.delete("sel.first", "sel.last")
+            print(get_text)
+            self.main_writing_space.clipboard_clear()
+            self.main_writing_space.clipboard_append(get_text)
+        except:
+            print("Cut selection error")
 
     def copy(self, e=None):
-        get_text = self.main_writing_space.get("sel.first", "sel.last")
-        print(get_text)
-        self.main_writing_space.clipboard_clear()
-        self.main_writing_space.clipboard_append(get_text)
+        try:
+            get_text = self.main_writing_space.get("sel.first", "sel.last")
+            print(get_text)
+            self.main_writing_space.clipboard_clear()
+            self.main_writing_space.clipboard_append(get_text)
+        except:
+            print("Copy selection error")
 
     def paste(self, e=None):
-        self.main_writing_space.insert(INSERT,self.main_writing_space.clipboard_get())
+        try:
+            self.main_writing_space.insert(INSERT,self.main_writing_space.clipboard_get())
+        except:
+            print("Paste Selection Error")
 
     def clear(self):
         conform = messagebox.askyesno("Conformation to clean", "Do you want to clean the writing space?")
         if conform:
             self.main_writing_space.delete(1.0, END)
             self.previous_tag_remove()
-
 
     # View menu Configuration
     def find_UI(self, e=None):
@@ -1507,11 +1534,143 @@ class TextPad:
             self.total_word_and_line_counter(None)
 
     # header 3 configuration
+    def case_change(self, indexing):
+        try:
+            get_text = self.main_writing_space.get("sel.first", "sel.last")
+            get_index = self.main_writing_space.index("sel.first")
+            self.main_writing_space.delete("sel.first", "sel.last")
+            if indexing == 'u':
+                get_text=get_text.upper()
+            else:
+                get_text = get_text.lower()
+            self.main_writing_space.insert(get_index, get_text)
+        except:
+            print("Here's the selection error in case change")
 
 
+    def text_to_speech_convert_with_threading(self):
+        def text_to_speech_convert():
+            try:
+                get_text = self.main_writing_space.get("sel.first", "sel.last")
+                self.engine_control.say(get_text)
+                self.engine_control.runAndWait()
+            except:
+                messagebox.showerror("Selection Problem", "Nothing selected here")
+        threading.Thread(target=text_to_speech_convert).start()
+
+    def ui_for_searching(self):
+        top = Toplevel(relief=RAISED, bd=10)
+        top.title("Searching Option")
+        top.geometry("600x600")
+        top.maxsize(600, 600)
+        top.minsize(600, 600)
+        top.config(bg="#141414")
+
+        def speak(main_searching_text, medium):
+            self.engine_control.say(f"Searching a topic {main_searching_text} in {medium}")
+            self.engine_control.runAndWait()
+
+        def searching_option(index, searching_text):
+            text_to_search = searching_text.split(" ")
+            if index == "Google":
+                if self.searching_things_in_google == "Nothing To Show":
+                    self.searching_things_in_google = searching_text
+                else:
+                    self.searching_things_in_google+=searching_text
+                    
+                text_to_search = '+'.join(text_to_search)
+                webbrowser.open(f'https://www.google.com/search?q={text_to_search}')
+                threading.Thread(target=lambda: speak(searching_text, index)).start()
+
+            elif index == "Youtube":
+                text_to_search = '+'.join(text_to_search)
+                webbrowser.open(f'https://www.youtube.com/search?q={text_to_search}')
+                threading.Thread(target=lambda: speak(searching_text, index)).start()
+
+            elif index == "Facebook":
+                text_to_search = '-'.join(text_to_search)
+                webbrowser.open(f'https://www.facebook.com/public/{text_to_search}')
+                threading.Thread(target=lambda: speak(searching_text, index)).start()
+
+            elif index == "Linkedin":
+                text_to_search = '/'.join(text_to_search)
+                webbrowser.open(f'https://www.linkedin.com/pub/dir/{text_to_search}')
+                threading.Thread(target=lambda: speak(searching_text, index)).start()
+
+            else:
+                text_to_search = '_'.join(text_to_search)
+                webbrowser.open(f'https://www.instagram.com/{text_to_search}/?hl=en')
+                threading.Thread(target=lambda: speak(searching_text, index)).start()
+
+            top.destroy()
+
+        try:
+            get_text = self.main_writing_space.get("sel.first", "sel.last")
+
+            google_search = Button(top, text="Search in Google", font=("Arial", 25, "bold", "italic"), bg="#262626", fg="#FF0000", relief=RAISED, bd=5, activebackground="green", activeforeground="gold", command=lambda: searching_option("Google", get_text))
+            google_search.pack(pady=20)
+
+            youtube_search = Button(top, text="Search in Youtube", font=("Arial", 25, "bold", "italic"), bg="#262626", fg="yellow", relief=RAISED, bd=5, activebackground="green", activeforeground="gold", command=lambda: searching_option("Youtube", get_text))
+            youtube_search.pack(pady=20)
+
+            facebook_search = Button(top, text="Search in Facebook", font=("Arial", 25, "bold", "italic"), bg="#262626", fg="#00FF00", relief=RAISED, bd=5, activebackground="green", activeforeground="gold", command=lambda: searching_option("Facebook", get_text))
+            facebook_search.pack(pady=20)
+
+            linkedin_search = Button(top, text="Search in LinkedIn", font=("Arial", 25, "bold", "italic"), bg="#262626", fg="magenta", relief=RAISED, bd=5, activebackground="green", activeforeground="gold", command=lambda: searching_option("Linkedin", get_text))
+            linkedin_search.pack(pady=20)
+
+            instagram_search = Button(top, text="Search in Instagram", font=("Arial", 25, "bold", "italic"), bg="#262626", fg="chocolate",            relief=RAISED, bd=5, activebackground="green", activeforeground="gold", command=lambda: searching_option("Instagram", get_text))
+            instagram_search.pack(pady=20)
+
+            top.mainloop()
+        except:
+            top.destroy()
+            messagebox.showerror("Selection Error", "Nothing Selected Here to Search")
 
 
+    # Header 4 Functionality
+    def pdf_to_text(self):
+        take_pdf = filedialog.askopenfilename(initialdir="\Desktop", defaultextension="*.pdf", title="Select a pdf file")
+        if take_pdf:
+            self.main_writing_space.delete(1.0, END)
+            take_control = open(take_pdf, 'rb')
+            pdf_reader = PyPDF2.PdfFileReader(take_control)
+            for i in range(pdf_reader.numPages):
+                pageobject = pdf_reader.getPage(i)
+                self.main_writing_space.insert(INSERT, pageobject.extractText())
+            take_control.close()
 
+    def open_wikipedia(self):
+        get_text = self.main_writing_space.get("sel.first", "sel.last")
+        def speak(text_to_speak):
+            self.engine_control.say(f"Searching {text_to_speak} in Wikipedia")
+            self.engine_control.runAndWait()
+        threading.Thread(target=lambda: speak(get_text)).start()
+        get_text = "_".join(get_text.split(" "))
+        webbrowser.open(f'https://en.wikipedia.org/wiki/{get_text}')
+
+    @staticmethod
+    def connect_drawing_app():
+        top = Toplevel()
+        top.geometry("1350x730")
+        top.maxsize(1350, 730)
+        top.minsize(900, 600)
+        top.wm_iconbitmap("Icons/main_logo.ico")
+        top.config(bg="#D3D3D3")
+        Drawing_app.Sketch(top)
+        top.mainloop()
+
+    def attack_drawing_app(self):
+        top = Tk()
+        top.geometry("1350x730")
+        top.maxsize(1350, 730)
+        top.minsize(900, 600)
+        top.wm_iconbitmap("Icons/main_logo.ico")
+        top.config(bg="#D3D3D3")
+        # Sketch(top)
+        top.mainloop()
+
+    # Status Maintainer
     def total_word_and_line_counter(self, e = None):
         total_take = list(self.main_writing_space.get(1.0, END).split("\n"))
 
