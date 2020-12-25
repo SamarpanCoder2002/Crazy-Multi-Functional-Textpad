@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk, messagebox, font, filedialog, colorchooser
 from PIL import Image,ImageTk
-import time, win32api, pyttsx3, threading, webbrowser, PyPDF2, pywhatkit, datetime
+import time, win32api, pyttsx3, threading, webbrowser, PyPDF2, datetime
 import mysql.connector as db
 from fpdf import FPDF
 import Sketch_With_Sam as Drawing_app
@@ -460,7 +460,7 @@ class TextPad:
             access_old.commit()
 
             take_input = f"INSERT INTO {acc_name} VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-            take_values = (1, acc_pwd, "", "", 0, 0, "Nothing To Show", "Nothing To Show", "Nothing To Show","Nothing To Show","Nothing To Show")
+            take_values = (1, acc_pwd, "01/01/2020", "Nothing", 0, 0, "Nothing To Show", "Nothing To Show", "Nothing To Show","Nothing To Show","Nothing To Show")
             switch_cur.execute(take_input, take_values)
             access_old.commit()
 
@@ -483,7 +483,7 @@ class TextPad:
         Label(top, text="-:Enter the Storage Password to Unlock:-", font=("Arial", 25, "bold", "italic"), bg="#141414", fg="gold").place(x=80, y=100)
 
         db_pwd_take = Entry(top, width=26, font=("Arial", 18, "bold", "italic"), bg="#141414", fg="#d6b575", relief=SUNKEN, bd=5, show="*")
-        db_pwd_take.place(x=220, y=160)
+        db_pwd_take.place(x=200, y=160)
         db_pwd_take.focus()
 
         def change_visibility_db_pwd():# Password Visibility Controller
@@ -903,9 +903,11 @@ class TextPad:
     def new_window(self, e=None):
         take_response = messagebox.askyesno("New Window Conformation","Do you want to open new Window?")
         if take_response:
-            self.main_writing_space.delete(1.0,END)
-            self.saved_file_name = "New Document"
+            self.main_writing_space.delete(1.0, END)
+            self.previous_tag_remove()
             self.window.title(f"Crazy TextPad          {self.saved_file_name}")
+            if self.permission_to_update == 1:
+                self.total_word_and_line_counter(None)
 
     def open_another_file(self, e=None):
         file_name = filedialog.askopenfilename(initialdir="\Desktop", title="Select a file",filetypes=(("Text Files", "*.txt"), ("C Files", "*.c"), ("CPP Files", "*.cpp"), ("Python Files", "*.py"), ("HTML Files","*.html"), ("CSS Files","*.css"), ("JavaScript Files","*.js")))
@@ -945,12 +947,12 @@ class TextPad:
         self.main_writing_space.clipboard_clear()
         take_file_name = filedialog.asksaveasfilename(initialdir="\Desktop", title="Select location and name to save that file as PDF", defaultextension=".pdf")
         if take_file_name:
-            self.pdf_saved_file_name = take_file_name.split("/")
+            file_name_extract = take_file_name.split("/")
             
             if self.pdf_saved_file_name == "Nothing To Show":
-                self.pdf_saved_file_name = self.pdf_saved_file_name[len(self.pdf_saved_file_name)-1]
+                self.pdf_saved_file_name = file_name_extract[len(file_name_extract)-1]
             else:
-                self.pdf_saved_file_name += self.pdf_saved_file_name[len(self.pdf_saved_file_name) - 1]
+                self.pdf_saved_file_name += file_name_extract[len(file_name_extract) - 1]
                 
             self.window.title(f"Crazy TextPad         {take_file_name}")
             pdf_control = FPDF()
@@ -1042,15 +1044,12 @@ class TextPad:
                     self.main_writing_space.tag_configure("highlight", background="red")
                     match_pattern = 0
                     while True:
-                        # print("Start index: ", start_index)
                         start_index = self.main_writing_space.search(search_it, start_index, stopindex=END)
                         if not start_index:
                             break
-                        # print(start_index)
                         end_pos = f"{start_index}+{len(search_it)}c"
                         match_pattern+=1
                         self.main_writing_space.tag_add("highlight", start_index, end_pos)
-                        # print("end position: ", end_pos)
                         start_index = end_pos
                     messagebox.showinfo("Finding result", f"Total finding result: {match_pattern}")
                 else:
@@ -1625,12 +1624,10 @@ class TextPad:
             top.destroy()
             messagebox.showerror("Selection Error", "Nothing Selected Here to Search")
 
-
     # Header 4 Configuration
     def pdf_to_text(self):
         take_pdf = filedialog.askopenfilename(initialdir="\Desktop", defaultextension="*.pdf", title="Select a pdf file")
         if take_pdf:
-            #self.main_writing_space.delete(1.0, END)
             take_control = open(take_pdf, 'rb')
             pdf_reader = PyPDF2.PdfFileReader(take_control)
             for i in range(pdf_reader.numPages):
@@ -1639,61 +1636,65 @@ class TextPad:
             take_control.close()
     
     def send_msg_to_whatsapp(self):
-        top = Toplevel()
-        top.title("Replacing")
-        top.geometry("800x400")
-        top.maxsize(800, 400)
-        top.minsize(800, 400)
-        top.config(bg="#141414")
+        try:
+            import pywhatkit
+            top = Toplevel()
+            top.title("Replacing")
+            top.geometry("800x400")
+            top.maxsize(800, 400)
+            top.minsize(800, 400)
+            top.config(bg="#141414")
 
-        messagebox.showwarning("Browser Open Alert", "Please open your browser and connect your whatsapp with whatsapp web by scanning the barcode and don't minimised the browser to send message properly")
+            messagebox.showwarning("Browser Open Alert", "Please open your browser and connect your whatsapp with whatsapp web by scanning the barcode and don't minimised the browser to send message properly")
 
-        Label(top, text="Enter a text to search", font=("Arial", 25, "bold", "italic"), bg="#141414", fg="gold").place(x=215, y=50)
-        Label(top, text="Receiver Number", font=("Arial", 17, "bold", "italic"), bg="#141414", fg="#00FF00").place(x=20, y=125)
-        Label(top, text="Text To Send", font=("Arial", 17, "bold", "italic"), bg="#141414", fg="#00FF00").place(x=20, y=205)
+            Label(top, text="Enter some details to send message", font=("Arial", 25, "bold", "italic"), bg="#141414", fg="gold").place(x=120, y=50)
+            Label(top, text="Receiver Number", font=("Arial", 17, "bold", "italic"), bg="#141414", fg="#00FF00").place(x=20, y=125)
+            Label(top, text="Text To Send", font=("Arial", 17, "bold", "italic"), bg="#141414", fg="#00FF00").place(x=20, y=205)
 
-        num_entry = Entry(top, font=("Arial", 20, "bold", "italic"), bg="#141400", fg="#d6b575", insertbackground="#d6b575", relief=SUNKEN, bd=5, show="*")
-        num_entry.place(x=230, y=120)
+            num_entry = Entry(top, font=("Arial", 20, "bold", "italic"), bg="#141400", fg="#d6b575", insertbackground="#d6b575", relief=SUNKEN, bd=5, show="*")
+            num_entry.place(x=230, y=120)
 
-        text_body = Entry(top, font=("Arial", 20, "bold", "italic"), bg="#141400", fg="#d6b575", insertbackground="#d6b575", relief=SUNKEN, bd=5)
-        text_body.place(x=230, y=200)
+            text_body = Entry(top, font=("Arial", 20, "bold", "italic"), bg="#141400", fg="#d6b575", insertbackground="#d6b575", relief=SUNKEN, bd=5)
+            text_body.place(x=230, y=200)
 
-        num_entry.focus()
+            num_entry.focus()
 
-        def msg_send_with_verification(sending_no, text_to_send):
-            try:
-                get_no = list(sending_no)
-                get_no.remove('+')
-                remake_no = "".join(get_no)
-                if len(get_no)==12 and int(remake_no) and text_to_send:
-                    def send_msg_finally_to_wp():
-                        top.destroy()
-                        self.engine_control.say('Please Wait.. This will take time to send message......')
-                        self.engine_control.runAndWait() 
-                        self.send_msg_to_wp = text_to_send
-                        current_time = datetime.datetime.now()
-                        pywhatkit.sendwhatmsg(sending_no, text_to_send, time_hour=current_time.hour, time_min=(current_time.minute+1), wait_time=(60-current_time.second)//2 + 2)
-                    threading.Thread(target=send_msg_finally_to_wp).start()    
-                else:  
+            def msg_send_with_verification(sending_no, text_to_send):
+                try:
+                    get_no = list(sending_no)
+                    get_no.remove('+')
+                    remake_no = "".join(get_no)
+                    if len(get_no)==12 and int(remake_no) and text_to_send:
+                        def send_msg_finally_to_wp():
+                            top.destroy()
+                            self.engine_control.say('Please Wait.. This will take time to send message......')
+                            self.engine_control.runAndWait() 
+                            self.send_msg_to_wp = text_to_send
+                            current_time = datetime.datetime.now()
+                            pywhatkit.sendwhatmsg(sending_no, text_to_send, time_hour=current_time.hour, time_min=(current_time.minute+1), wait_time=(60-current_time.second)//2 + 2)
+                        threading.Thread(target=send_msg_finally_to_wp).start()    
+                    else:  
+                        messagebox.showerror('Number Input Error','Number should start with countrycode and without consider countrycode, it should be 10 digit number')
+                except:
                     messagebox.showerror('Number Input Error','Number should start with countrycode and without consider countrycode, it should be 10 digit number')
-            except:
-                messagebox.showerror('Number Input Error','Number should start with countrycode and without consider countrycode, it should be 10 digit number')
 
-        def change_visibility_ph_num():
-            if num_entry['show'] == '*':
-                num_entry['show'] = ''
-                visibility_other['text'] = "Hide"
-            else:
-                num_entry['show'] = '*'
-                visibility_other['text'] = "Show"
+            def change_visibility_ph_num():
+                if num_entry['show'] == '*':
+                    num_entry['show'] = ''
+                    visibility_other['text'] = "Hide"
+                else:
+                    num_entry['show'] = '*'
+                    visibility_other['text'] = "Show"
 
-        visibility_other = Button(top, text="Show", font=("Arial", 18, "bold", "italic"), bg="#141414", fg="#00FF00", relief=RAISED, bd=2, command=change_visibility_ph_num)
-        visibility_other.place(x=600, y=120)
-        
-        ok_btn = Button(top, text="Ok", width=5, font=("Arial", 18, "bold", "italic"), bg="#262626", fg="#FF0000",        activebackground="#262626", activeforeground="#FF0000", command=lambda: msg_send_with_verification(num_entry.get(), text_body.get()))
-        ok_btn.place(x=360, y=280)
+            visibility_other = Button(top, text="Show", font=("Arial", 18, "bold", "italic"), bg="#141414", fg="#00FF00", relief=RAISED, bd=2, command=change_visibility_ph_num)
+            visibility_other.place(x=600, y=120)
+            
+            ok_btn = Button(top, text="Ok", width=5, font=("Arial", 18, "bold", "italic"), bg="#262626", fg="#FF0000",        activebackground="#262626", activeforeground="#FF0000", command=lambda: msg_send_with_verification(num_entry.get(), text_body.get()))
+            ok_btn.place(x=360, y=280)
 
-        top.mainloop()
+            top.mainloop()
+        except:
+            messagebox.showerror("Error", "Make Sure that your internet is connected and your browser is not minimised")    
 
     def open_wikipedia(self):
         try:
@@ -1705,8 +1706,7 @@ class TextPad:
             get_text = "_".join(get_text.split(" "))
             webbrowser.open(f'https://en.wikipedia.org/wiki/{get_text}')
         except:
-
-            messagebox.showerror("Selection Error", "Please select a text to search in wikipedia")    
+            messagebox.showerror("Error", "Please check your internet connection and select a text to search in wikipedia")    
 
     @staticmethod
     def connect_drawing_app():
