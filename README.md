@@ -123,7 +123,7 @@ Here I use a special submodule of mysql: mysql.connector
 
 ### <img src="Images_For_README/repair_img.jpg" width="20px"> ***_This is the Beta Version of My Project. Now I am Working on this._*** 
 
-### <img src="Images_For_README/handshake.png" width="20px">***_If someone want to improve this project, you're always welcome._***
+### <img src="Images_For_README/handshake.png" width="25px">***_If someone want to improve this project, you're always welcome._***
 
 ---
 ## <p align="center"> ***_Show <img src="Images/../Images_For_README/heart.jpg" width="25px"> By Starring My Repos_***</p>
