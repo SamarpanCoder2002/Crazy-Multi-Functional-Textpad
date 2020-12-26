@@ -1715,6 +1715,7 @@ class TextPad:
         top.maxsize(1350, 730)
         top.minsize(900, 600)
         top.config(bg="#D3D3D3")
+        top.wm_iconbitmap("sketch_images/main_logo.ico")
         Drawing_app.Sketch(top)
         top.mainloop()
 
