@@ -1316,13 +1316,3 @@ class Sketch:
 
         del_lb = Label(top, text="Select a region + Delete button--->Delete the Segment ",font=("Arial", 15, "bold"), fg="green", bg="chocolate")
         del_lb.place(x=120, y=365)
-
-if __name__ == '__main__':
-    window = Tk()
-    window.geometry("1350x730")
-    window.maxsize(1350,730)
-    window.minsize(900,600)
-    window.wm_iconbitmap("sketch_images/main_logo.ico")
-    window.config(bg="#D3D3D3")
-    Sketch(window)
-    window.mainloop()
