@@ -49,6 +49,7 @@
 - [ ] ***_PyPDF2_***
 - [x] ***_datetime_***
 - [ ] ***_Pywhatkit_***
+- [ ] ***_FPDF_***
 - [ ] ***_mysql_***
 
 - ## ***_Please have a look here:-_***
@@ -109,6 +110,14 @@ Here I use a special submodule of mysql: mysql.connector
 🎯 
 [To see mysql-connector Documentation Click Here](https://pypi.org/project/mysql-connector/)
 
+### 6. ***_FPDF_***
+```<p align="center>
+Project description. FPDF is a library for PDF document generation under Python.
+```
+#### 🎯 Install FPDF by writing `pip install fpdf` in your ***cmd or Terminal***
+🎯 
+[To see FPDF Documentation Click Here](https://pypi.org/project/fpdf/)
+
 ---
 # !! Alert:-
 - ### Storage Password for Log-in or Sign-up is the ***_MySQL Database Password_***
@@ -123,11 +132,11 @@ Here I use a special submodule of mysql: mysql.connector
 
 ### <img src="Images_For_README/repair_img.jpg" width="20px"> ***_This is the Beta Version of My Project. Now I am Working on this._*** 
 
-### <img src="Images_For_README/handshake.png" width="25px">***_If someone want to improve this project, you're always welcome._***
+### <img src="Images_For_README/handshake.png" width="20px">***_If someone want to improve this project, you're always welcome._***
 
 ---
 ## <p align="center"> ***_Show <img src="Images/../Images_For_README/heart.jpg" width="25px"> By Starring My Repos_***</p>
 
-### ***_[Click Here To see This Project Video](https://youtu.be/TQtRNc9Uzh8)_***
+### ***_[Click Here To see This Project Video]()_***
 
 ### ***_[Connect With Me on LinkedIn to Get Regular Project Updates](https://www.linkedin.com/in/samarpan-dasgupta-4aa1061b0/ "LCO")_***
