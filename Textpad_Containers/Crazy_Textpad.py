@@ -194,7 +194,7 @@ class TextPad:
         self.status_3 = Label(self.window, text=f"Working Time: 00:00:00", font=("Arial",10,"bold"), bg="gold", fg="brown", relief=RIDGE, bd=3, width=46, height=1)
         self.status_3.place(x=(325+325)+3, y=90)
 
-        self.status_4 = Label(self.window, text="Account holder_name: Sam", font=("Arial", 10, "bold"), bg="gold", fg="brown", relief=RIDGE, bd=3, width=41, height=1)
+        self.status_4 = Label(self.window, text="Account holder name: ", font=("Arial", 10, "bold"), bg="gold", fg="brown", relief=RIDGE, bd=3, width=41, height=1)
         self.status_4.place(x=(325 + 325 + 325+53), y=90)
 
         # Store Instructional Button for previous use
@@ -1759,9 +1759,9 @@ class TextPad:
     def __time_counter(self):
         self.get_time+=1
         if self.get_time>-1:
-            self.status_components[2].after(1000, self.__time_counter)  # Recursive function call after 1 sec = 1000 milisecond
             converted_time = time.strftime("%H:%M:%S", time.gmtime(self.get_time))
             self.status_components[2]['text'] = f"Working Time: {converted_time}"
+            self.status_components[2].after(1000, self.__time_counter)  # Recursive function call after 1 sec = 1000 milisecond
         else:
             self.status_components[2]['text'] = "Working Time: 00:00:00"
 
