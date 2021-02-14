@@ -6,7 +6,7 @@
 ![](https://img.shields.io/badge/Status-Beta-blue.svg)
 
 
-## <p align="center"><img src="Images_For_README/heart.jpg" width="30px"> Presenting My New Project Crazy Textpad <img src="Images_For_README/heart.jpg" width="30px"></p>
+# <p align="center"><img src="Images_For_README/heart.jpg" width="30px"> Presenting My New Project Crazy Textpad <img src="Images_For_README/heart.jpg" width="30px"></p>
 
 ![Pic Ecxample](Images_For_README/textpad_dark_mode.png)
 
@@ -24,7 +24,7 @@
 - ***_Get Details About Some Topics from Wikipedia_***
 - ***_Working History Store_***
 
----
+
 ### <p align="left">➡️  _Some Important Functionality Used Here:_</p>
 - ***_Undo_***
 - ***_Redo_***
@@ -37,7 +37,7 @@
 - ***_Automatically Total Word and Line Counter_***
 - ***_Working Time_***
 
----
+
 ### <p align="left">⚒️ _Important Module Used Here:_</p>
 - [x] ***_Tkinter_***
 - [ ] ***_Pillow_***
@@ -52,12 +52,12 @@
 - [ ] ***_FPDF_***
 - [ ] ***_mysql_***
 
-- ## ***_Please have a look here:-_***
+- ### ***_Please have a look here:-_***
 
 - [x] ===> ***_This Modules Comes With Python. You don't have to install it manually._***
 - [ ] ===> ***_You have to install it manually. Details about that modules given below._***
 
----
+
 ### <p align="left">💻 _Module that You have to Install:_</p>
 ### 1. ***_Pillow_***
 ```<p align="center>
@@ -118,8 +118,8 @@ Project description. FPDF is a library for PDF document generation under Python.
 🎯 
 [To see FPDF Documentation Click Here](https://pypi.org/project/fpdf/)
 
----
-# !! Alert:-
+***
+### !! Alert:-
 - ### Storage Password for Log-in or Sign-up is the ***_MySQL Database Password_***
 
 ![About Storage Password Information](Images_For_README/storage_pwd.png)
@@ -128,14 +128,14 @@ Project description. FPDF is a library for PDF document generation under Python.
 - ### ***_But You have to Keep it in your mind to log-in into Your Account_***
 
 ---
-## <p align="center">   ***_⚒️ Status of This Project ⚒️_***</p>
+### <p align="center">   ***_⚒️ Status of This Project ⚒️_***</p>
 
 ### <img src="Images_For_README/repair_img.jpg" width="20px"> ***_This is the Beta Version of My Project. Now I am Working on this._*** 
 
 ### <img src="Images_For_README/handshake.png" width="20px">***_If someone want to improve this project, you're always welcome._***
 
 ---
-## <p align="center"> ***_Show <img src="Images/../Images_For_README/heart.jpg" width="25px"> By Starring My Repos_***</p>
+### <p align="center"> ***_Show <img src="Images/../Images_For_README/heart.jpg" width="25px"> By Starring My Repos_***</p>
 
 - ### ***_[Click Here To see This Project Video]()_***
 
