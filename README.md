@@ -10,7 +10,7 @@
 
 ![Pic Ecxample](Images_For_README/textpad_dark_mode.png)
 
----
+
 ### <p align="left">💡 _Awesome Features of this Project are:_</p>
 - ***_Dark Mode_***
 - ***_Font Change_***
