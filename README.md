@@ -120,12 +120,12 @@ Project description. FPDF is a library for PDF document generation under Python.
 
 ***
 ### !! Alert:-
-- ### Storage Password for Log-in or Sign-up is the ***_MySQL Database Password_***
+- ### 🎯 Storage Password for Log-in or Sign-up is the ***_MySQL Database Password_***
 
 ![About Storage Password Information](Images_For_README/storage_pwd.png)
 
-- ### _Account Password_ Can be Anything that You Want. 
-- ### ***_But You have to Keep it in your mind to log-in into Your Account_***
+- ### 🎯 _Account Password_ Can be Anything that You Want. 
+- ### 🎯 ***_But You have to Keep it in your mind to log-in into Your Account_***
 
 ---
 ### <p align="center">   ***_⚒️ Status of This Project ⚒️_***</p>
