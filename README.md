@@ -6,7 +6,7 @@
 ![](https://img.shields.io/badge/Status-Beta-blue.svg)
 
 
-# <p align="center"><img src="Images_For_README/heart.jpg" width="30px"> Presenting My New Project Crazy Textpad <img src="Images_For_README/heart.jpg" width="30px"></p>
+# <p align="center"><img src="Images_For_README/heart.jpg" width="30px"> Introducing New Project Crazy Textpad <img src="Images_For_README/heart.jpg" width="30px"></p>
 
 ![Pic Ecxample](Images_For_README/textpad_dark_mode.png)
 
